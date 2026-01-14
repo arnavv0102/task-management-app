@@ -11,6 +11,7 @@ export const apiRequest = async (
   };
 
   if (token) {
+    console.log("sending token",token)
     headers.Authorization = `Bearer ${token}`;
   }
 
