@@ -129,7 +129,7 @@ const Dashboard = () => {
       {/* CREATE TASK */}
       <section className="create-task">
         <h3>Create Task</h3>
-        <TaskForm onTaskCreated={handleTaskCreated} />
+        <TaskForm onTaskAdded={handleTaskCreated} />
       </section>
 
       {/* 🔹 FILTERS + SEARCH */}
