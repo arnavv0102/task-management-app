@@ -1,0 +1,38 @@
+.register-box {
+  background: #ffffff;
+  padding: 2rem;
+  width: 320px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.register-box h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.register-box input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 0.8rem;
+}
+
+.register-box button {
+  width: 100%;
+  padding: 10px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+.success {
+  color: green;
+  font-size: 14px;
+}
