@@ -55,3 +55,23 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+// GET /auth/profile
+exports.profile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id, name, email")
+      .eq("id", userId)
+      .single();
+
+    if (error) throw error;
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
