@@ -19,7 +19,7 @@ const Login = () => {
 
     try {
       const data = await apiRequest("/auth/login", "POST", form);
-      login(data.token);
+      login(data.token,data.user);
     } catch (err) {
       setError(err.message);
     } finally {

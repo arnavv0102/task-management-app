@@ -28,9 +28,10 @@ export const AuthProvider = ({ children }) => {
     fetchProfile();
   }, [token]);
 
-  const login = (jwt) => {
+  const login = (jwt,userdata) => {
     localStorage.setItem("token", jwt);
     setToken(jwt);
+    setUser(userdata);
   };
 
   const logout = () => {
