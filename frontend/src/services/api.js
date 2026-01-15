@@ -1,6 +1,5 @@
 const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
-
 export const apiRequest = async (
   endpoint,
   method = "GET",
@@ -12,7 +11,6 @@ export const apiRequest = async (
   };
 
   if (token) {
-    console.log("sending token",token)
     headers.Authorization = `Bearer ${token}`;
   }
 
@@ -22,7 +20,16 @@ export const apiRequest = async (
     body: body ? JSON.stringify(body) : null,
   });
 
-  const data = await response.json();
+  // ✅ Read response safely
+  const text = await response.text();
+  if (!text) throw new Error("Empty response from server"); // avoids JSON parse error
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    throw new Error("Invalid JSON response from server");
+  }
 
   if (!response.ok) {
     throw new Error(data.message || "API Error");
