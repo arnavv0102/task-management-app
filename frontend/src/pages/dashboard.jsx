@@ -35,9 +35,17 @@ const Dashboard = () => {
         const statData = await apiRequest("/tasks/stats", "GET", null, token);
 
         // ✅ SAFELY HANDLE BACKEND RESPONSE
-        const tasksArray = Array.isArray(taskData)
-          ? taskData
-          : taskData?.tasks || [];
+        // Accept array or object with data/tasks field
+        let tasksArray = [];
+        if (Array.isArray(taskData)) {
+          tasksArray = taskData;
+        } else if (taskData?.data) {
+          tasksArray = taskData.data;
+        } else if (taskData?.tasks) {
+          tasksArray = taskData.tasks;
+        }
+
+        console.log("Fetched tasks:", tasksArray); // DEBUG
 
         setTasks(tasksArray);
         setFilteredTasks(tasksArray);
@@ -52,7 +60,7 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [token]);
 
-  // 🔹 FILTER + SEARCH LOGIC (HARDENED)
+  // 🔹 FILTER + SEARCH LOGIC
   useEffect(() => {
     let tempTasks = tasks.filter(Boolean);
 
@@ -79,7 +87,7 @@ const Dashboard = () => {
     setFilteredTasks(tempTasks);
   }, [statusFilter, priorityFilter, search, tasks]);
 
-  // 🔹 ADD TASK HANDLER (SAFE)
+  // 🔹 ADD TASK HANDLER
   const handleTaskCreated = (newTask) => {
     if (!newTask) return;
 
@@ -92,6 +100,14 @@ const Dashboard = () => {
         newTask.status === "Pending"
           ? prev.pending + 1
           : prev.pending,
+      inProgress:
+        newTask.status === "In Progress"
+          ? prev.inProgress + 1
+          : prev.inProgress,
+      completed:
+        newTask.status === "Completed"
+          ? prev.completed + 1
+          : prev.completed,
     }));
   };
 
@@ -100,12 +116,12 @@ const Dashboard = () => {
     try {
       await apiRequest(`/tasks/${taskId}`, "DELETE", null, token);
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
-    } catch(err){
+      setFilteredTasks((prev) => prev.filter((task) => task.id !== taskId));
+    } catch (err) {
       alert("Failed to delete task");
     }
   };
-     
-         
+
   if (loading) return <p className="loading">Loading dashboard...</p>;
 
   return (
