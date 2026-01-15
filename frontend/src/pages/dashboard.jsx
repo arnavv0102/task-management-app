@@ -27,18 +27,23 @@ const Dashboard = () => {
   const [priorityFilter, setPriorityFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  // FETCH TASKS + STATS
+  // 🔹 FETCH TASKS + STATS
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const taskData = await apiRequest("/tasks", "GET", null, token);
         const statData = await apiRequest("/tasks/stats", "GET", null, token);
 
-        setTasks(taskData.tasks || []);
-        setFilteredTasks(taskData.tasks || []);
+        // ✅ SAFELY HANDLE BACKEND RESPONSE
+        const tasksArray = Array.isArray(taskData)
+          ? taskData
+          : taskData?.tasks || [];
+
+        setTasks(tasksArray);
+        setFilteredTasks(tasksArray);
         setStats(statData || {});
       } catch (err) {
-        console.error("Dashboard error:", err.message);
+        console.error("Dashboard error:", err);
       } finally {
         setLoading(false);
       }
@@ -47,9 +52,9 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [token]);
 
-  // 🔹 FILTER + SEARCH LOGIC
+  // 🔹 FILTER + SEARCH LOGIC (HARDENED)
   useEffect(() => {
-    let tempTasks = [...tasks];
+    let tempTasks = tasks.filter(Boolean);
 
     if (statusFilter) {
       tempTasks = tempTasks.filter(
@@ -66,7 +71,7 @@ const Dashboard = () => {
     if (search) {
       tempTasks = tempTasks.filter(
         (task) =>
-          task.title.toLowerCase().includes(search.toLowerCase()) ||
+          task.title?.toLowerCase().includes(search.toLowerCase()) ||
           task.description?.toLowerCase().includes(search.toLowerCase())
       );
     }
@@ -74,11 +79,12 @@ const Dashboard = () => {
     setFilteredTasks(tempTasks);
   }, [statusFilter, priorityFilter, search, tasks]);
 
-  // ADD TASK HANDLER
+  // 🔹 ADD TASK HANDLER (SAFE)
   const handleTaskCreated = (newTask) => {
-    setTasks([newTask, ...tasks]);
+    if (!newTask) return;
 
-    // Update stats locally
+    setTasks((prev) => [newTask, ...prev]);
+
     setStats((prev) => ({
       ...prev,
       total: prev.total + 1,
@@ -89,6 +95,17 @@ const Dashboard = () => {
     }));
   };
 
+  // 🔹 DELETE TASK HANDLER
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await apiRequest(`/tasks/${taskId}`, "DELETE", null, token);
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+    } catch(err){
+      alert("Failed to delete task");
+    }
+  };
+     
+         
   if (loading) return <p className="loading">Loading dashboard...</p>;
 
   return (
@@ -132,7 +149,7 @@ const Dashboard = () => {
         <TaskForm onTaskAdded={handleTaskCreated} />
       </section>
 
-      {/* 🔹 FILTERS + SEARCH */}
+      {/* FILTERS + SEARCH */}
       <section className="filters">
         <input
           type="text"
@@ -169,7 +186,7 @@ const Dashboard = () => {
         {filteredTasks.length === 0 ? (
           <p className="empty">No tasks found.</p>
         ) : (
-          <TaskList tasks={filteredTasks} setTasks={setTasks} />
+          <TaskList tasks={filteredTasks} onDelete={handleDeleteTask} />
         )}
       </section>
     </div>

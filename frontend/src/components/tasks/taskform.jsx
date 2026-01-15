@@ -21,7 +21,8 @@ const TaskForm = ({ onTaskAdded }) => {
 
     try {
       const data = await apiRequest("/tasks", "POST", form, token);
-      onTaskAdded(data.task);
+      console.log("api response",data);
+      onTaskAdded(data);
       setForm({
         title: "",
         description: "",
